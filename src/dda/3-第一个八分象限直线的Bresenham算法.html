@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DDA</title>
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+        }
+
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            border: 2px grey solid;
+        }
+    </style>
+</head>
+<body>
+<div id="canvas-container">
+    <canvas id="canvas" width=600 height=600></canvas>
+</div>
+</body>
+<script>
+    var canvas = document.getElementById("canvas");
+    var canvas_context = canvas.getContext("2d");
+    var canvas_buffer = canvas_context.getImageData(0, 0, canvas.width, canvas.height);
+    var canvas_pitch = canvas_buffer.width * 4;
+
+    var PutPixel = function (x, y, color) {
+        //将输入x坐标转换为以canvas中心为原点：Math.floor() 确保坐标是整数（像素必须整型坐标）
+        x = canvas.width / 2 + Math.floor(x);
+        //反转y轴方向（因为canvas坐标系向下，数学坐标系向上）,-1 补偿canvas坐标系从顶部开始计数的特性
+        y = canvas.height / 2 - Math.floor(y);
+
+        if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
+            return;
+        }
+
+        var offset = 4 * x + canvas_pitch * y;
+        canvas_buffer.data[offset++] = color[0];
+        canvas_buffer.data[offset++] = color[1];
+        canvas_buffer.data[offset++] = color[2];
+        canvas_buffer.data[offset++] = 255;
+    }
+
+    var UpdateCanvas = function () {
+        canvas_context.putImageData(canvas_buffer, 0, 0);
+    }
+
+    var Round = function (x) {
+        return Math.floor(x + 0.5);
+    }
+
+    class Point {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    var BresenHamLine = function (p0, p1) {
+        let dx = p1.x - p0.x;
+        var dy = p1.y - p0.y;
+        var eps1 = Math.max(Math.abs(dx), Math.abs(dy));
+        var stepX = dx / eps1;
+        var stepY = dy / eps1;
+        var x = p0.x, y = p0.y;
+        for (var i = 1; i <= eps1; i++) {
+            console.log("x=" + x + "," + Round(x) + ", y=" + y + " , " + Round(y));
+            PutPixel(Round(x), Round(y), [0, 0, 0]);
+            x += stepX;
+            y += stepY;
+        }
+    }
+
+    for (var angle = 0; angle < 360; angle += 5) {
+        var r = 300;
+        var x = r * Math.cos(angle * Math.PI / 180);
+        var y = r * Math.sin(angle * Math.PI / 180);
+        DDALine(new Point(0, 0), new Point(x, y));
+    }
+    UpdateCanvas();
+</script>
+</html>
