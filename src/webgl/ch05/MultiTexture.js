@@ -24,11 +24,6 @@ function initVertexBuffers(gl) {
         -0.5, -0.5, -0.3, -0.2,
         0.5, 0.5, 1.7, 1.7,
         0.5, -0.5, 1.7, -0.2
-        //顶点坐标  纹理坐标
-        // -0.5, 0.5, 0.0, 1.0,
-        // -0.5, -0.5, 0.0, 0.0,
-        // 0.5, 0.5, 1.0, 1.0,
-        // 0.5, -0.5, 1.0, 0.0
     ]);
     let n = 4;
 
@@ -65,8 +60,6 @@ function loadTexture(gl, n, texture, u_Sampler, image) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
 
     gl.uniform1i(u_Sampler, 0);
