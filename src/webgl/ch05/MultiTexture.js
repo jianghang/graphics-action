@@ -11,19 +11,22 @@ var VSHADER_SOURCE =
 var FSHADER_SOURCE =
     'precision mediump float;\n' +
     '\n' +
-    'uniform sampler2D u_Sampler;\n' +
+    'uniform sampler2D u_Sampler0;\n' +
+    'uniform sampler2D u_Sampler1;\n' +
     'varying vec2 v_TexCoord;\n' +
     '\n' +
     'void main() {\n' +
-    '    gl_FragColor = texture2D(u_Sampler, v_TexCoord);\n' +
+    '    vec4 color0 = texture2D(u_Sampler0,v_TexCoord);\n' +
+    '    vec4 color1 = texture2D(u_Sampler1,v_TexCoord);\n' +
+    '    gl_FragColor = color0 * color1;\n' +
     '}';
 
 function initVertexBuffers(gl) {
     let verticesTexCoords = new Float32Array([
-        -0.5, 0.5, -0.3, 1.7,
-        -0.5, -0.5, -0.3, -0.2,
-        0.5, 0.5, 1.7, 1.7,
-        0.5, -0.5, 1.7, -0.2
+        -0.5, 0.5, 0.0, 1.0,
+        -0.5, -0.5, 0.0, 0.0,
+        0.5, 0.5, 1.0, 1.0,
+        0.5, -0.5, 1.0, 0.0
     ]);
     let n = 4;
 
@@ -54,30 +57,48 @@ function initVertexBuffers(gl) {
     return n;
 }
 
-function loadTexture(gl, n, texture, u_Sampler, image) {
+let g_texUnit0 = false, gl_texUnit1 = false;
+
+function loadTexture(gl, n, texture, u_Sampler, image, texUnit) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-    gl.activeTexture(gl.TEXTURE0);
+
+    if (texUnit === 0) {
+        gl.activeTexture(gl.TEXTURE0);
+        g_texUnit0 = true;
+    } else {
+        gl.activeTexture(gl.TEXTURE1);
+        gl_texUnit1 = true
+    }
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
 
-    gl.uniform1i(u_Sampler, 0);
+    gl.uniform1i(u_Sampler, texUnit);
 
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+    if (g_texUnit0 && gl_texUnit1) {
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+    }
 }
 
 function initTextures(gl, n) {
-    let texture = gl.createTexture();
-    let u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+    let texture0 = gl.createTexture();
+    let texture1 = gl.createTexture();
+    let u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+    let u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
 
-    let image = new Image();
-    image.onload = function () {
-        loadTexture(gl, n, texture, u_Sampler, image);
+    let image0 = new Image();
+    let image1 = new Image();
+    image0.onload = function () {
+        loadTexture(gl, n, texture0, u_Sampler0, image0, 0);
     };
-    image.src = '../../resources/sky.jpg';
+    image1.onload = function () {
+        loadTexture(gl, n, texture1, u_Sampler1, image1, 1);
+    }
+    image0.src = '../../resources/redflower.jpg';
+    image1.src = '../../resources/circle.gif';
 
     return true;
 }
