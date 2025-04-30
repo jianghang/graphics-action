@@ -1,12 +1,13 @@
 var VSHADER_SOURCE =
     'attribute vec4 a_Position;\n' +
     'attribute vec4 a_Color;\n' +
+    'uniform mat4 u_ModelMatrix;\n' +
     'uniform mat4 u_ViewMatrix;\n' +
     'uniform mat4 u_ProjMatrix;\n' +
     'varying vec4 v_Color;\n' +
     '\n' +
     'void main() {\n' +
-    '    gl_Position = u_ProjMatrix * u_ViewMatrix * a_Position;\n' +
+    '    gl_Position = u_ProjMatrix * u_ViewMatrix * u_ModelMatrix * a_Position;\n' +
     // '    gl_Position = a_Position;\n' +
     '    v_Color = a_Color;\n' +
     '}';
@@ -37,6 +38,7 @@ function main() {
 
     let u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
     let u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
+    let u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
 
     let viewMatrix = new Matrix4();
     document.onkeydown = function (ev) {
@@ -48,7 +50,22 @@ function main() {
     projMatrix.setPerspective(30.0, canvas.width / canvas.height, 1.0, 100.0);
     gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
-    draw(gl, n, u_ViewMatrix, viewMatrix);
+    let modelMatrix = new Matrix4();
+    modelMatrix.setTranslate(0.75, 0.0, 0.0);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+    // draw(gl, n, u_ViewMatrix, viewMatrix);
+    viewMatrix.setLookAt(0.0, 0.0, 5.0, 0.0, 0.0, -100.0, 0.0, 1.0, 0.0);
+    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.drawArrays(gl.TRIANGLES, 0, n);
+
+    modelMatrix.setTranslate(-0.75, 0.0, 0.0);
+    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+    gl.drawArrays(gl.TRIANGLES, 0, n);
 }
 
 let g_eyeX = 0.0, g_eyeY = 0.0, g_eyeZ = 5.0;
@@ -77,31 +94,19 @@ function draw(gl, n, u_ViewMatrix, viewMatrix) {
 
 function initVertexBuffers(gl) {
     let vertices = new Float32Array([
-        0.75, 1.0, -4.0, 0.4, 1.0, 0.4,
-        0.25, -1.0, -4.0, 0.4, 1.0, 0.4,
-        1.25, -1.0, -4.0, 1.0, 0.4, 0.4,
+        0.0, 1.0, -4.0, 0.4, 1.0, 0.4,
+        -0.5, -1.0, -4.0, 0.4, 1.0, 0.4,
+        0.5, -1.0, -4.0, 1.0, 0.4, 0.4,
 
-        0.75, 1.0, -2.0, 1.0, 0.4, 0.4,
-        0.25, -1.0, -2.0, 1.0, 1.0, 0.4,
-        1.25, -1.0, -2.0, 1.0, 1.0, 0.4,
+        0.0, 1.0, -2.0, 1.0, 0.4, 0.4,
+        -0.5, -1.0, -2.0, 1.0, 1.0, 0.4,
+        0.5, -1.0, -2.0, 1.0, 1.0, 0.4,
 
-         0.75, 1.0, 0.0, 0.4, 0.4, 1.0,
-         0.25, -1.0, 0.0, 0.4, 0.4, 1.0,
-         1.25, -1.0, 0.0, 1.0, 0.4, 0.4,
-
-        -0.75, 1.0, -4.0, 0.4, 1.0, 0.4,
-        -1.25, -1.0, -4.0, 0.4, 1.0, 0.4,
-        -0.25, -1.0, -4.0, 1.0, 0.4, 0.4,
-
-        -0.75, 1.0, -2.0, 1.0, 0.4, 0.4,
-        -1.25, -1.0, -2.0, 1.0, 1.0, 0.4,
-        -0.25, -1.0, -2.0, 1.0, 1.0, 0.4,
-
-        -0.75, 1.0, 0.0, 0.4, 0.4, 1.0,
-        -1.25, -1.0, 0.0, 0.4, 0.4, 1.0,
-        -0.25, -1.0, 0.0, 1.0, 0.4, 0.4,
+        0.0, 1.0, 0.0, 0.4, 0.4, 1.0,
+        -0.5, -1.0, 0.0, 0.4, 0.4, 1.0,
+        0.5, -1.0, 0.0, 1.0, 0.4, 0.4,
     ]);
-    let n = 18;
+    let n = 9;
 
     //1. 创建缓冲区对象
     let vertexBuffer = gl.createBuffer();
