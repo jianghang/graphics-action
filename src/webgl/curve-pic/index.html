@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deformation</title>
+    <style>
+        canvas {
+            background: #e3e7e9;
+            background-image: linear-gradient(45deg, #f6fafc 25%, transparent 0),
+            linear-gradient(45deg, transparent 75%, #f6fafc 0),
+            linear-gradient(45deg, #f6fafc 25%, transparent 0),
+            linear-gradient(45deg, transparent 75%, #f6fafc 0);
+            background-position: 0 0, 12px 12px, 12px 12px, 24px 24px;
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body onload="main()">
+<p>WebGL版图像弯曲变形(分段限制:1-1000)</p>
+<canvas id="webgl" width="1000" height="600">
+    Please use a browser that supports "canvas"
+</canvas>
+<br/>
+<label> xCount: </label>
+<input type="number" min="1" max="1000" value="200" id="xCount"/>
+<label> yCount: </label>
+<input type="number" min="1" max="1000" value="200" id="yCount"/>
+<br/>
+<label>angle: </label>
+<br/>
+<input id="angle" type="range" value="150" min="-150" max="150"/>
+<br/>
+
+<script src="../../lib/webgl-utils.js"></script>
+<script src="../../lib/webgl-debug.js"></script>
+<script src="../../lib/cuon-utils.js"></script>
+<script src="../../lib/cuon-matrix.js"></script>
+</body>
+</html>
